@@ -1,0 +1,11 @@
+{
+    "name": "mscp-starter",
+    "serve": [
+        {
+            "name": "services",
+            "description": "",
+            "returntype": "object",
+            "args": []
+        }
+    ]
+}
