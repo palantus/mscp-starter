@@ -3,9 +3,10 @@
     "serve": [
         {
             "name": "services",
-            "description": "",
+            "description": "A list of services known to starter",
             "returntype": "object",
-            "args": []
+            "args": [],
+            "title": "Services"
         }
     ]
 }

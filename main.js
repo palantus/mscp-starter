@@ -17,9 +17,20 @@ mscp.server.static(path.join(__dirname, 'www'));
     return;
 
   for(let s of setup.services){
-    services.push(runService(s))
+    let serv = runService(s)
+    services.push(serv)
+    await serviceReady(serv)
   }
 })()
+
+async function serviceReady(serv){
+  return new Promise((resolve, reject) => {
+    serv.worker.on("message", (m) => {
+      if(m == "mscp-is-ready")
+      resolve()
+    })
+  })
+}
 
 function runService(serviceSetup){
   let cwd = serviceSetup.path
