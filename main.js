@@ -12,7 +12,7 @@ mscp.server.static(path.join(__dirname, 'www'));
 
 (async () => {
   await mscp.start();
-  setup = mscp.server.setupHandler.setup.cluster
+  setup = mscp.server.setupHandler.setup.starter
   if(setup === undefined || setup.services === undefined)
     return;
 
