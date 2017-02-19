@@ -1,0 +1,8 @@
+{
+  "apps": [
+    {"name": "starter", "title": "Starter", "items": ["services"]}
+  ],
+  "items": [
+    {"name": "services", "title":"List services"}
+  ]
+}

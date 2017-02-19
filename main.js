@@ -2,7 +2,7 @@ const child = require('child_process');
 const MSCP = require("mscp");
 const path = require("path");
 const Handler = require("./handler.js");
-
+const UI = require("mscp-ui");
 
 
 var services = [];
@@ -11,6 +11,7 @@ let mscp = new MSCP(new Handler(services));
 mscp.server.static(path.join(__dirname, 'www'));
 
 (async () => {
+  await new UI().attachTo(mscp, "/")
   await mscp.start();
   setup = mscp.server.setupHandler.setup.starter
   if(setup === undefined || setup.services === undefined)
