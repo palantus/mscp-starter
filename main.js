@@ -1,24 +1,24 @@
 const child = require('child_process');
 const MSCP = require("mscp");
 const path = require("path");
+const fs = require("fs");
 const Handler = require("./handler.js");
-const UI = require("mscp-ui");
 
 
 var services = [];
 let setup = {}
-let mscp = new MSCP(new Handler(services));
+let mscp = new MSCP(Handler);
+mscp.server.handlerGlobal = {services: services}
 mscp.server.static(path.join(__dirname, 'www'));
 
 (async () => {
-  await new UI().attachTo(mscp, "/")
   await mscp.start();
   setup = mscp.server.setupHandler.setup.starter
   if(setup === undefined || setup.services === undefined)
     return;
 
   for(let s of setup.services){
-    let serv = runService(s)
+    let serv = await runService(s)
     services.push(serv)
     await serviceReady(serv)
   }
@@ -33,12 +33,19 @@ async function serviceReady(serv){
   })
 }
 
-function runService(serviceSetup){
+async function runService(serviceSetup){
   let cwd = serviceSetup.path
-  let worker = child.fork(path.join(path.join(__dirname, cwd), serviceSetup.main), {cwd: cwd})
-  worker.on('close', (code) => onServiceDeath(worker, serviceSetup, code));
-  console.log(`Started service ${serviceSetup.name}`)
-  return {setup: serviceSetup, worker: worker}
+  let mainFile = path.join(path.join(__dirname, cwd), serviceSetup.main)
+  let mainFileExists = await new Promise(r => fs.stat(mainFile, (err) => r(err == null)))
+  if(mainFileExists){
+    let worker = child.fork(mainFile, {cwd: cwd})
+    worker.on('close', (code) => onServiceDeath(worker, serviceSetup, code));
+    console.log(`Started service ${serviceSetup.name}`)
+    return {setup: serviceSetup, worker: worker}
+  } else {
+    console.log("ERROR: Missing file: " + mainFile)
+    process.exit(-1)
+  }
 }
 
 async function onServiceDeath(worker, serviceSetup, code){

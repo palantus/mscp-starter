@@ -5,7 +5,6 @@
   "repository" : "palantus/mscp-starter",
   "License" : "MIT",
 	"dependencies" : {
-    "mscp" : "*",
-    "mscp-ui" : "*"
+    "mscp" : "*"
   }
 }

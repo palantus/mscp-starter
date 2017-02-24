@@ -5,20 +5,16 @@ const path = require("path")
 
 class Handler{
 
-  constructor(services){
-    this.runningServices = services
-  }
-
-  init(){
+  async init(){
     // Initialize handler if necessary
   }
 
   async services(){
     let res = []
-    for(let s of this.runningServices){
+    for(let s of this.global.services){
       let es = JSON.parse(JSON.stringify(s.setup))
       let setup = await this.getServiceSetup(es)
-      
+
       if(setup.enableHTTP !== false)
         es.http_port = setup.http_port || 8080
       if(setup.enableHTTPS === true)
