@@ -4,6 +4,11 @@
 	"main" : "main.js",
   "repository" : "palantus/mscp-starter",
   "License" : "MIT",
+	"scripts": {
+		"install-windows-service": "winser -i",
+		"uninstall-windows-service": "winser -r",
+		"start": "node --harmony-async-await main.js"
+	},
 	"dependencies" : {
     "mscp" : "*"
   }
