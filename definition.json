@@ -1,12 +1,60 @@
 {
-    "name": "mscp-starter",
-    "serve": [
+  "name": "mscp-starter",
+  "serve": [
+    {
+      "name": "services",
+      "description": "A list of services known to starter",
+      "returntype": "object",
+      "args": [],
+      "title": "Services"
+    },
+    {
+      "name": "kill",
+      "title": "Kill service",
+      "description": "Killed services will be automatically restarted",
+      "returntype": "string",
+      "namespace": "",
+      "args": [
         {
-            "name": "services",
-            "description": "A list of services known to starter",
-            "returntype": "object",
-            "args": [],
-            "title": "Services"
+          "name": "name",
+          "title": "Service name",
+          "type": "string",
+          "required": true,
+          "description": ""
         }
-    ]
+      ]
+    },
+    {
+      "name": "log",
+      "title": "Get log",
+      "description": "",
+      "returntype": "array",
+      "namespace": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Service name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "setup",
+      "title": "Show service setup",
+      "description": "",
+      "returntype": "object",
+      "namespace": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Service name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
+    }
+  ]
 }

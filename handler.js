@@ -26,6 +26,27 @@ class Handler{
     return res
   }
 
+  async kill(name){
+    for(let s of this.global.services){
+      if(s.setup.name == name){
+        s.worker.kill();
+        return "Service killed";
+      }
+    }
+    throw "Service not found"
+  }
+
+  async log(name){
+    let service = this.global.services.find((s) => s.setup.name == name)
+    if(service)
+      return JSON.parse(JSON.stringify(service.log)).reverse()
+  }
+
+  async setup(name){
+    let service = this.global.services.find((s) => s.setup.name == name)
+    return service ? service.setup : null
+  }
+
   async getServiceSetup(setup){
     try{
       return new Promise((r) => fs.readFile(path.join(path.join(__dirname, setup.path), "setup.json"), "utf-8", (err, file) => r(JSON.parse(file))))

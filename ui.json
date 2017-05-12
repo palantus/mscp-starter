@@ -1,0 +1,27 @@
+{
+  "apps": {
+    "": {"title": "Starter", "items": ["services", "kill", "log"], "defaultIndex": 0, "showMenu": false}
+  },
+  "items": {
+    "services": {
+      "title":" List services",
+      "autorun": true,
+      "actions":{
+        "<row>": [
+          {"call": "log", "title": "View log", "args": {"name": "active.name"}},
+          {"call": "setup", "title": "Show setup", "args": {"name": "active.name"}},
+          {"call": "kill", "title": "Restart", "args": {"name": "active.name"}, "ui": "notify-result"},
+          {"type": "link", "url": "<curhostnoport>:<active.http_port>/mscp", "title": "Open: MSCP Setup"},
+          {"type": "link", "url": "<curhostnoport>:<active.http_port>/api/browse", "title": "Open: API Browser"},
+          {"type": "link", "url": "<curhostnoport>:<active.http_port>", "title": "Open: Root"}
+        ],
+        "": [
+          {"type": "link", "item": "services", "title": "Refresh"}
+        ]
+      }
+    },
+    "log": {"title":"Get log"},
+    "kill": {"title":"Restart service"},
+    "setup": {}
+  }
+}
