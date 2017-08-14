@@ -21,7 +21,6 @@
       }
     },
     "log": {"title":"Get log"},
-    "kill": {"title":"Restart service"},
-    "setup": {}
+    "kill": {"title":"Restart service"}
   }
 }
