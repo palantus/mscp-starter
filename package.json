@@ -1,16 +1,16 @@
 {
 	"name": "mscp-starter",
 	"version": "1.0.0",
-	"main" : "main.js",
-  "repository" : "palantus/mscp-starter",
-  "License" : "MIT",
+	"main": "main.js",
+	"repository": "palantus/mscp-starter",
+	"License": "MIT",
 	"scripts": {
 		"install-windows-service": "winser -i",
 		"uninstall-windows-service": "winser -r",
 		"start": "node --harmony-async-await main.js"
 	},
-	"dependencies" : {
-    "mscp" : "*",
-    "moment": "*"
-  }
+	"dependencies": {
+		"mscp": "*",
+		"moment": "*"
+	}
 }
