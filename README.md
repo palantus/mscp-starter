@@ -17,3 +17,19 @@ And uninstall:
 ```
 npm run-script uninstall-windows-service
 ```
+
+## Usage
+
+Add mscp services to setup.json like this:
+
+```
+"starter": {
+  "services": [
+    {
+      "name": "passec",
+      "path": "../mscp-passec",
+      "main": "main.js"
+    }
+  ]
+}
+```
