@@ -2,6 +2,8 @@
 
 const fs = require("fs")
 const path = require("path")
+const util = require('util');
+const exec = util.promisify(require('child_process').exec);
 
 class Handler{
 
@@ -34,6 +36,20 @@ class Handler{
       }
     }
     throw "Service not found"
+  }
+
+  async gitpull(name){
+    let service = this.setup(name)
+    if(!service) throw "Unknown service"
+    const { stdout, stderr } = await exec('git pull', {cwd: service.path});
+    return stderr&&stdout?`errors: ${stderr}, info: ${stdout}`:stderr?stderr:stdout;
+  }
+
+  async npminstall(name){
+    let service = this.setup(name)
+    if(!service) throw "Unknown service"
+    const { stdout, stderr } = await exec('npm install', {cwd: service.path});
+    return stderr&&stdout?`errors: ${stderr}, info: ${stdout}`:stderr?stderr:stdout;
   }
 
   async log(name){

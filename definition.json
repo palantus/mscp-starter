@@ -55,6 +55,24 @@
           "description": ""
         }
       ]
+    },
+    {
+      "name": "gitpull",
+      "title": "Pull changes from GIT",
+      "description": "",
+      "returntype": "string",
+      "namespace": "",
+      "default": "",
+      "args": []
+    },
+    {
+      "name": "npminstall",
+      "title": "NPM install",
+      "description": "",
+      "returntype": "string",
+      "namespace": "",
+      "default": "",
+      "args": []
     }
   ]
 }

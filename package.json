@@ -3,7 +3,7 @@
 	"version": "1.0.0",
 	"main": "main.js",
 	"repository": "palantus/mscp-starter",
-	"License": "MIT",
+	"license": "MIT",
 	"scripts": {
 		"install-windows-service": "winser -i",
 		"uninstall-windows-service": "winser -r",
