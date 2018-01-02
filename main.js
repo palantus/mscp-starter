@@ -20,8 +20,11 @@ mscp.server.static(path.join(__dirname, 'www'));
 
   for(let s of setup.services){
     let serv = await runService(s)
+
     services.push(serv)
-    await serviceReady(serv)
+
+    if(s.enabled !== false)
+      await serviceReady(serv)
   }
 })()
 
@@ -39,31 +42,55 @@ async function runService(serviceSetup){
   let cwd = serviceSetup.path
   let mainFile = path.join(path.join(__dirname, cwd), serviceSetup.main)
   let mainFileExists = await new Promise(r => fs.stat(mainFile, (err) => r(err == null)))
-  if(mainFileExists){
+  let service = {setup: serviceSetup, log: [], restartCount: 0}
+  let logText = moment().format("YYYY-MM-DD_HH:mm:ss") + ": ";
+  if(mainFileExists && serviceSetup.enabled !== false){
     let worker = child.fork(mainFile, {cwd: cwd, silent: true})
-    let service = {setup: serviceSetup, worker: worker, log: []}
+    service.worker = worker
     worker.on('close', (code) => onServiceDeath(worker, serviceSetup, code));
-    worker.stdout.on('data', (data) => service.log.push(`${moment().format("YYYY-MM-DD_HH-mm-ss")}: ${data}`))
-    worker.stderr.on('data', (data) => service.log.push(`${moment().format("YYYY-MM-DD_HH-mm-ss")}: ${data}`))
-    console.log(`Started service ${serviceSetup.name}`)
-    return service
+    worker.stdout.on('data', (data) => service.log.push(`${moment().format("YYYY-MM-DD_HH:mm:ss")}: ${data}`))
+    worker.stderr.on('data', (data) => service.log.push(`${moment().format("YYYY-MM-DD_HH:mm:ss")}: ${data}`))
+    setInterval(() => {
+      if(service.log.length > 200){
+        service.log = service.log.slice(service.log.length - 150, service.log.length)
+        service.log.push(`${moment().format("YYYY-MM-DD_HH:mm:ss")}: Log is too large. Removing all but the last 150 entries.`)
+      }
+    }, 5000)
+    setInterval(() => service.restartCount = 0, 86400000 /* 24 hr */)
+    logText += `Started service ${serviceSetup.name}`
+  } else if(serviceSetup.enabled === false){
+    logText += `Skipping service ${serviceSetup.name} because it is disabled`
   } else {
-    console.log("ERROR: Missing file: " + mainFile)
-    process.exit(-1)
+    logText += `Missing file '${mainFile}' for service ${serviceSetup.name}. Disabling!`
+    serviceSetup.enabled = false;
+    //process.exit(-1)
   }
+  console.log(logText)
+  service.log.push(logText)
+
+  return service
 }
 
 async function onServiceDeath(worker, serviceSetup, code){
   console.log(`Service ${serviceSetup.name} died with code ${code}`);
   await new Promise((r) => setTimeout(r, 1000));
-  console.log("Attempting to restart...")
   for(let i = 0; i < services.length; i++){
     if(services[i].setup.name == serviceSetup.name){
-       let oldLog = services[i].log
+       let oldServ = services[i]
+
+       if(oldServ.restartCount > 100){
+         services[i].log.push(moment().format("YYYY-MM-DD_HH:mm:ss") + ": Service has been restarted more than 100 times in 24 hours and is now disabled.")
+         serviceSetup.enabled = false
+         return;
+       }
+
+       console.log("Attempting to restart...")
        services[i] = await runService(serviceSetup)
-       services[i].log = oldLog
-       services[i].log.push(moment().format("YYYY-MM-DD_HH-mm-ss") + ": ---- Service restarted ----")
+       services[i].log = oldServ.log
+       services[i].log.push(moment().format("YYYY-MM-DD_HH:mm:ss") + ": ---- Service restarted ----")
+       services[i].restartCount = oldServ.restartCount + 1
        console.log(`Service ${serviceSetup.name} has been restarted`)
+       oldServ = null
        return;
     }
   }

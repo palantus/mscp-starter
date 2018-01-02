@@ -16,12 +16,10 @@ class Handler{
     for(let s of this.global.services){
       let es = JSON.parse(JSON.stringify(s.setup))
       let setup = await this.getServiceSetup(es)
-
-      if(setup.enableHTTP !== false)
-        es.http_port = setup.http_port || 8080
-      if(setup.enableHTTPS === true)
-        es.https_port = setup.https_port || 443
-
+      es.http_port = (setup && setup.enableHTTP !== false) ? setup.http_port || 8080 : null
+      es.https_port = (setup && setup.enableHTTPS === true) ? setup.https_port || 443 : null
+      es.enabled = es.enabled === false ? false : true
+      es.restartCount = s.restartCount
       res.push(es)
     }
 
@@ -32,7 +30,7 @@ class Handler{
     for(let s of this.global.services){
       if(s.setup.name == name){
         s.worker.kill();
-        return "Service killed";
+        return "Service stopped.";
       }
     }
     throw "Service not found"
@@ -65,11 +63,73 @@ class Handler{
 
   async getServiceSetup(setup){
     try{
-      return new Promise((r) => fs.readFile(path.join(path.join(__dirname, setup.path), "setup.json"), "utf-8", (err, file) => r(JSON.parse(file))))
+      return new Promise((r) => fs.readFile(path.join(path.join(__dirname, setup.path), "setup.json"), "utf-8", (err, file) => r(err?null:JSON.parse(file))))
     } catch(err){
 
       return {port: 8080}
     }
+  }
+
+  async addService(name, path, mainfile){
+    this.ensureServicesIsSet();
+
+    let newService = {name: name, path: path, main: mainfile, enabled: true}
+    this.mscp.setupHandler.setup.starter.services.push(newService)
+    await this.mscp.setupHandler.writeSetup()
+
+    this.global.services.push({setup: newService, log: []})
+
+    return `Service ${name} has been added`
+  }
+
+  async removeService(name){
+    this.ensureServicesIsSet();
+
+    for(let i = 0; i < this.mscp.setupHandler.setup.starter.services.length; i++){
+      if(this.mscp.setupHandler.setup.starter.services[i].name == name){
+        this.mscp.setupHandler.setup.starter.services.splice(i, 1)
+        break;
+      }
+    }
+
+    for(let i = 0; i < this.global.services.length; i++){
+      if(this.global.services[i].setup.name == name){
+        this.global.services.splice(i, 1)
+      }
+    }
+    await this.mscp.setupHandler.writeSetup()
+    return `Service ${name} has been removed`
+  }
+
+  async enableService(name){
+    this.ensureServicesIsSet();
+    for(let i = 0; i < this.mscp.setupHandler.setup.starter.services.length; i++){
+      if(this.mscp.setupHandler.setup.starter.services[i].name == name){
+        this.mscp.setupHandler.setup.starter.services[i].enabled = true;
+        break;
+      }
+    }
+    await this.mscp.setupHandler.writeSetup()
+    return `Service ${name} has been enabled`
+  }
+
+  async disableService(name){
+    this.ensureServicesIsSet();
+    for(let i = 0; i < this.mscp.setupHandler.setup.starter.services.length; i++){
+      if(this.mscp.setupHandler.setup.starter.services[i].name == name){
+        this.mscp.setupHandler.setup.starter.services[i].enabled = false;
+        break;
+      }
+    }
+    await this.mscp.setupHandler.writeSetup()
+    return `Service ${name} has been enabled`
+  }
+
+  ensureServicesIsSet(){
+    if(!this.mscp.setupHandler.setup.starter)
+      return null
+    if(!this.mscp.setupHandler.setup.starter.services)
+      return null
   }
 }
 

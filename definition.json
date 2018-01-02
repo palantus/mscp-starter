@@ -73,6 +73,88 @@
       "namespace": "",
       "default": "",
       "args": []
+    },
+    {
+      "name": "addService",
+      "title": "Add Service",
+      "description": "",
+      "returntype": "boolean",
+      "namespace": "",
+      "default": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "path",
+          "title": "Path",
+          "type": "string",
+          "required": true,
+          "description": ""
+        },
+        {
+          "name": "mainfile",
+          "title": "Main file",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "removeService",
+      "title": "Remove Service",
+      "description": "",
+      "returntype": "object",
+      "namespace": "",
+      "default": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "enableService",
+      "title": "Enable service",
+      "description": "",
+      "returntype": "string",
+      "namespace": "",
+      "default": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
+    },
+    {
+      "name": "disableService",
+      "title": "Disable service",
+      "description": "",
+      "returntype": "string",
+      "namespace": "",
+      "default": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
     }
   ]
 }
