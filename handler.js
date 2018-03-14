@@ -36,6 +36,16 @@ class Handler{
     throw "Service not found"
   }
 
+  async reload(name){
+    for(let s of this.global.services){
+      if(s.setup.name == name){
+        s.worker.send("reload");
+        return `Reload signal sent to process ${s.setup.name}`;
+      }
+    }
+    throw "Service not found"
+  }
+
   async gitpull(name){
     let service = this.setup(name)
     if(!service) throw "Unknown service"
@@ -122,7 +132,7 @@ class Handler{
       }
     }
     await this.mscp.setupHandler.writeSetup()
-    return `Service ${name} has been enabled`
+    return `Service ${name} has been disabled`
   }
 
   ensureServicesIsSet(){

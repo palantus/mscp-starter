@@ -16,6 +16,7 @@
           {"call": "enableService", "title": "Enable", "args": {"name": "active.name"}, "ui": "notify-result"},
           {"call": "disableService", "title": "Disable", "args": {"name": "active.name"}, "ui": "notify-result"},
           {"call": "removeService", "title": "Remove", "args": {"name": "active.name"}, "ui": "notify-result"},
+          {"call": "reload", "title": "Reload service", "args": {"name": "active.name"}, "ui": "notify-result"},
           {"type": "link", "url": "<curhostnoport>:<active.http_port>/mscp", "title": "Open: MSCP Setup"},
           {"type": "link", "url": "<curhostnoport>:<active.http_port>/api/browse", "title": "Open: API Browser"},
           {"type": "link", "url": "<curhostnoport>:<active.http_port>", "title": "Open: Root"}

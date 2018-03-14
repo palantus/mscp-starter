@@ -155,6 +155,23 @@
           "description": ""
         }
       ]
+    },
+    {
+      "name": "reload",
+      "title": "Reload service",
+      "description": "",
+      "returntype": "string",
+      "namespace": "",
+      "default": "",
+      "args": [
+        {
+          "name": "name",
+          "title": "Service name",
+          "type": "string",
+          "required": true,
+          "description": ""
+        }
+      ]
     }
   ]
 }
