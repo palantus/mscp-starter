@@ -36,3 +36,41 @@ Add mscp services to setup.json like this:
   }
 }
 ```
+
+## proxy
+
+http-proxy-middleware has been built in to support proxying requests to multiple services from a single port (based on hostname). First you need to enable it in setup.json for the starter:
+
+```
+proxyEnable: true,
+proxyPort: 3000,
+proxyRewrite: {                     (optional)
+    '^/api/getBucket' : '/b',       // rewrite path
+    '^/api/remove/path' : '/path'   // remove base path
+},
+proxySSL: {}                        //object to be passed to https.createServer() (optional)
+```
+
+(rewrites are optional)
+
+Then you need to add a domain to forward to a service setup in the same file:
+
+```
+{
+  "name": "test1",
+  "path": "../temp/test/test1",
+  "main": "main.js",
+  "enabled": true,
+  "domain": "t1.localhost"
+}
+```
+
+This will cause all request to t1.localhost:<proxyPort> to be forwarded to http://localhost:<port in service setup.json>.
+
+It is also possible to add additional proxy addresses outside of the services:
+
+```
+proxyRoutes: {
+  "test.mydomain.com" : "http://192.168.0.123:9000"
+}
+```

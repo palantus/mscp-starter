@@ -4,11 +4,58 @@ const fs = require("fs")
 const path = require("path")
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
+const express = require('express');
+const proxy = require('http-proxy-middleware');
 
 class Handler{
 
   async init(){
     // Initialize handler if necessary
+  }
+
+  async initFirst(){
+    if(this.mscp.setupHandler.setup.proxyEnable === true){
+      this.startProxy();
+    }
+  }
+
+  async startProxy(){
+
+    if(!this.mscp.setupHandler.setup.proxyPort)
+      throw "proxyPort not defined"
+
+    this.global.proxySettings = {
+            target: 'http://NOTEXISTINGDOMAIN', // target host
+            //changeOrigin: true,               // needed for virtual hosted sites
+            ws: true,                         // proxy websockets
+            pathRewrite: this.mscp.setupHandler.setup.proxyRewrite || undefined,
+            router: this.mscp.setupHandler.setup.proxyRoutes || {},
+            ssl: this.mscp.setupHandler.setup.proxySSL || undefined
+        };
+
+    for(let r in (this.global.proxySettings.router || {})){
+      this.global.proxySettings.router[`${r}:${this.mscp.setupHandler.setup.proxyPort}`] = this.global.proxySettings.router[r]
+      this.global.proxySettings.router[r] = undefined
+    }
+
+    let services = []
+    if(this.mscp.setupHandler.setup.starter && this.mscp.setupHandler.setup.starter.services)
+      services = this.mscp.setupHandler.setup.starter.services;
+
+    for(let s of services){
+      if(s.domain !== undefined){
+        let servicePort = (await this.getServiceSetup(s)).http_port
+        if(servicePort){
+          this.global.proxySettings.router[`${s.domain}:${this.mscp.setupHandler.setup.proxyPort}`] = `http://localhost:${servicePort}`;
+        }
+      }
+    }
+
+    this.global.proxy = proxy(this.global.proxySettings)
+
+    let app = express();
+    app.use('/', this.global.proxy);
+    app.listen(this.mscp.setupHandler.setup.proxyPort);
   }
 
   async services(){
@@ -76,7 +123,7 @@ class Handler{
       return new Promise((r) => fs.readFile(path.join(path.join(__dirname, setup.path), "setup.json"), "utf-8", (err, file) => r(err?null:JSON.parse(file))))
     } catch(err){
 
-      return {port: 8080}
+      return {"http_port": 8080}
     }
   }
 

@@ -11,6 +11,8 @@
 	},
 	"dependencies": {
 		"mscp": "*",
-		"moment": "*"
+		"moment": "*",
+		"express": "*",
+		"http-proxy-middleware": "*"
 	}
 }
