@@ -21,21 +21,32 @@ class Handler{
 
   async startProxy(){
 
-    if(!this.mscp.setupHandler.setup.proxyPort)
-      throw "proxyPort not defined"
+    if(!this.mscp.setupHandler.setup.proxyPort){
+      console.log("proxyPort not defined. Proxy not starting.")
+      return;
+    }
 
     this.global.proxySettings = {
             target: 'http://NOTEXISTINGDOMAIN', // target host
             //changeOrigin: true,               // needed for virtual hosted sites
             ws: true,                         // proxy websockets
-            pathRewrite: this.mscp.setupHandler.setup.proxyRewrite || undefined,
+            pathRewrite: this.mscp.setupHandler.setup.proxyRewrite,
             router: this.mscp.setupHandler.setup.proxyRoutes || {},
-            ssl: this.mscp.setupHandler.setup.proxySSL || undefined
+            ssl: this.mscp.setupHandler.setup.proxySSL
         };
+
+    if(this.global.proxySettings.ssl){
+      if(this.global.proxySettings.ssl.ca)
+        this.global.proxySettings.ssl.ca = fs.readFileSync(this.global.proxySettings.ssl.ca, "utf8");
+      if(this.global.proxySettings.ssl.cert)
+        this.global.proxySettings.ssl.cert = fs.readFileSync(this.global.proxySettings.ssl.cert, "utf8");
+      if(this.global.proxySettings.ssl.key)
+        this.global.proxySettings.ssl.key = fs.readFileSync(this.global.proxySettings.ssl.key, "utf8");
+    }
 
     for(let r in (this.global.proxySettings.router || {})){
       this.global.proxySettings.router[`${r}:${this.mscp.setupHandler.setup.proxyPort}`] = this.global.proxySettings.router[r]
-      this.global.proxySettings.router[r] = undefined
+      delete this.global.proxySettings.router[r]
     }
 
     let services = []
@@ -55,7 +66,11 @@ class Handler{
 
     let app = express();
     app.use('/', this.global.proxy);
-    app.listen(this.mscp.setupHandler.setup.proxyPort);
+
+    if(this.global.proxySettings.ssl)
+      require("https").createServer(this.global.proxySettings.ssl, app).listen(this.mscp.setupHandler.setup.proxyPort);
+    else
+      app.listen(this.mscp.setupHandler.setup.proxyPort);
   }
 
   async services(){
