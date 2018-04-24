@@ -30,9 +30,9 @@ class Handler{
             target: 'http://NOTEXISTINGDOMAIN', // target host
             //changeOrigin: true,               // needed for virtual hosted sites
             ws: true,                         // proxy websockets
-            pathRewrite: this.mscp.setupHandler.setup.proxyRewrite,
-            router: this.mscp.setupHandler.setup.proxyRoutes || {},
-            ssl: this.mscp.setupHandler.setup.proxySSL
+            pathRewrite: this.mscp.setupHandler.setup.proxyRewrite ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRewrite)) : null,
+            router: JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRoutes || {})),
+            ssl: this.mscp.setupHandler.setup.proxySSL ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxySSL)) : null
         };
 
     if(this.global.proxySettings.ssl){
