@@ -27,7 +27,7 @@ class Handler{
     }
 
     this.global.proxySettings = {
-            target: 'http://NOTEXISTINGDOMAIN', // target host
+            target: this.mscp.setupHandler.setup.proxyTargetDefault || 'http://NOTEXISTINGDOMAIN', // target host
             //changeOrigin: true,               // needed for virtual hosted sites
             ws: true,                         // proxy websockets
             pathRewrite: this.mscp.setupHandler.setup.proxyRewrite ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRewrite)) : null,
@@ -67,10 +67,14 @@ class Handler{
     let app = express();
     app.use('/', this.global.proxy);
 
-    if(this.global.proxySettings.ssl)
-      require("https").createServer(this.global.proxySettings.ssl, app).listen(this.mscp.setupHandler.setup.proxyPort);
-    else
-      app.listen(this.mscp.setupHandler.setup.proxyPort);
+    if(this.global.proxySettings.ssl){
+      let server = require("https").createServer(this.global.proxySettings.ssl, app);
+      server.listen(this.mscp.setupHandler.setup.proxyPort);
+      server.on('upgrade', (req, socket, head) => proxy.upgrade(req, socket, head));
+    } else {
+      let server = require("https").createServer(this.global.proxySettings.ssl, app);
+      app.listen(this.mscp.setupHandler.setup.proxyPort).on('upgrade', (req, socket, head) => proxy.upgrade(req, socket, head));
+    }
   }
 
   async services(){
