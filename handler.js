@@ -70,10 +70,10 @@ class Handler{
     if(this.global.proxySettings.ssl){
       let server = require("https").createServer(this.global.proxySettings.ssl, app);
       server.listen(this.mscp.setupHandler.setup.proxyPort);
-      server.on('upgrade', (req, socket, head) => proxy.upgrade(req, socket, head));
+      server.on('upgrade', this.global.proxy.upgrade);
     } else {
       let server = require("https").createServer(this.global.proxySettings.ssl, app);
-      app.listen(this.mscp.setupHandler.setup.proxyPort).on('upgrade', (req, socket, head) => proxy.upgrade(req, socket, head));
+      app.listen(this.mscp.setupHandler.setup.proxyPort).on('upgrade', this.global.proxy.upgrade);
     }
   }
 
