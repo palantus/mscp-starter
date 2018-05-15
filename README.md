@@ -37,6 +37,8 @@ Add mscp services to setup.json like this:
 }
 ```
 
+If you need to add a service that isn't created using MSCP, then you need to set ''isMSCP'' to false for the service. That tells Starter to not wait for startup confirmation.
+
 ## proxy
 
 http-proxy-middleware has been built in to support proxying requests to multiple services from a single port (based on hostname). First you need to enable it in setup.json for the starter:

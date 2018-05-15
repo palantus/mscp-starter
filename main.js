@@ -23,7 +23,7 @@ mscp.server.static(path.join(__dirname, 'www'));
 
     services.push(serv)
 
-    if(s.enabled !== false)
+    if(s.enabled !== false && s.isMSCP !== false)
       await serviceReady(serv)
   }
 })()
