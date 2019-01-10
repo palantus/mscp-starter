@@ -7,7 +7,7 @@
 	"scripts": {
 		"install-windows-service": "winser -i",
 		"uninstall-windows-service": "winser -r",
-		"start": "node --harmony-async-await main.js"
+		"start": "node main.js"
 	},
 	"dependencies": {
 		"mscp": "*",
