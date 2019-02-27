@@ -32,7 +32,8 @@ class Handler{
             ws: true,                         // proxy websockets
             pathRewrite: this.mscp.setupHandler.setup.proxyRewrite ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRewrite)) : null,
             router: JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRoutes || {})),
-            ssl: this.mscp.setupHandler.setup.proxySSL ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxySSL)) : null
+            ssl: this.mscp.setupHandler.setup.proxySSL ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxySSL)) : null,
+            xfwd: true
         };
 
     if(this.global.proxySettings.ssl){
