@@ -96,8 +96,15 @@ class Handler{
   async kill(name){
     for(let s of this.global.services){
       if(s.setup.name == name){
-        s.worker.kill();
-        return "Service stopped.";
+        if(s.worker){
+          s.worker.kill();
+          console.log("Killed service " + name)
+          return "Service stopped.";
+        } else {
+          console.log("Could not stop service");
+          console.log(s)
+          return "Could not stop service";
+        }
       }
     }
     throw "Service not found"
@@ -150,16 +157,19 @@ class Handler{
   async addService(name, path, mainfile){
     this.ensureServicesIsSet();
 
-    let newService = {name: name, path: path, main: mainfile, enabled: true}
+    let newService = {name: name, path: path, main: mainfile, enabled: false}
     this.mscp.setupHandler.setup.starter.services.push(newService)
     await this.mscp.setupHandler.writeSetup()
 
     this.global.services.push({setup: newService, log: []})
 
-    return `Service ${name} has been added`
+    return `Service ${name} has been added and disabled. Enable to start.`
   }
 
   async removeService(name){
+    await this.disableService(name);
+    await this.kill(name);
+
     this.ensureServicesIsSet();
 
     for(let i = 0; i < this.mscp.setupHandler.setup.starter.services.length; i++){
@@ -187,7 +197,9 @@ class Handler{
       }
     }
     await this.mscp.setupHandler.writeSetup()
-    return `Service ${name} has been enabled`
+    let servIndex = this.global.services.findIndex(serv => serv.setup.name == name);
+    this.global.services[servIndex] = await this.global.runService(name)
+    return `Service ${name} has been enabled and started`
   }
 
   async disableService(name){
@@ -199,7 +211,8 @@ class Handler{
       }
     }
     await this.mscp.setupHandler.writeSetup()
-    return `Service ${name} has been disabled`
+    await this.kill(name)
+    return `Service ${name} has been disabled and stopped`
   }
 
   ensureServicesIsSet(){

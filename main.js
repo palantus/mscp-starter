@@ -13,6 +13,8 @@ mscp.server.handlerGlobal = {services: services}
 mscp.server.static(path.join(__dirname, 'www'));
 
 (async () => {
+  mscp.server.handlerGlobal.runService = name => runService(services.find(serv => serv.setup.name == name).setup);
+
   await mscp.start();
   setup = mscp.server.setupHandler.setup.starter
   if(setup === undefined || setup.services === undefined)
@@ -74,26 +76,24 @@ async function runService(serviceSetup){
 async function onServiceDeath(worker, serviceSetup, code){
   console.log(`Service ${serviceSetup.name} died with code ${code}`);
   await new Promise((r) => setTimeout(r, 1000));
-  for(let i = 0; i < services.length; i++){
-    if(services[i].setup.name == serviceSetup.name){
-       let oldServ = services[i]
+  let i = services.findIndex(serv => serv.setup.name == serviceSetup.name)
+  let oldServ = services[i]
+  if(!oldServ || oldServ.setup.enabled === false)
+    return;
 
-       if(oldServ.restartCount > 100){
-         services[i].log.push(moment().format("YYYY-MM-DD_HH:mm:ss") + ": Service has been restarted more than 100 times in 24 hours and is now disabled.")
-         serviceSetup.enabled = false
-         return;
-       }
-
-       console.log("Attempting to restart...")
-       services[i] = await runService(serviceSetup)
-       services[i].log = oldServ.log
-       services[i].log.push(moment().format("YYYY-MM-DD_HH:mm:ss") + ": ---- Service restarted ----")
-       services[i].restartCount = oldServ.restartCount + 1
-       console.log(`Service ${serviceSetup.name} has been restarted`)
-       oldServ = null
-       return;
-    }
+  if(oldServ.restartCount > 100){
+    services[i].log.push(moment().format("YYYY-MM-DD_HH:mm:ss") + ": Service has been restarted more than 100 times in 24 hours and is now disabled.")
+    serviceSetup.enabled = false
+    return;
   }
+
+  console.log("Attempting to restart...")
+  services[i] = await runService(serviceSetup)
+  services[i].log = oldServ.log
+  services[i].log.push(moment().format("YYYY-MM-DD_HH:mm:ss") + ": ---- Service restarted ----")
+  services[i].restartCount = oldServ.restartCount + 1
+  console.log(`Service ${serviceSetup.name} has been restarted`)
+  oldServ = null
 }
 
 process.on('exit', function () {
