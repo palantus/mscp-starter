@@ -87,6 +87,7 @@ class Handler{
       es.https_port = (setup && setup.enableHTTPS === true) ? setup.https_port || 443 : null
       es.enabled = es.enabled === false ? false : true
       es.restartCount = s.restartCount
+      es.memUsage = s.memUsage || null
       res.push(es)
     }
 

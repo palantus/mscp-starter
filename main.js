@@ -35,6 +35,8 @@ async function serviceReady(serv){
     serv.worker.on("message", (m) => {
       if(m == "mscp-is-ready"){
         resolve()
+      } else if(typeof m === "string" && m.startsWith("mscp-mem:")){
+        serv.memUsage = Math.round(parseFloat(m.substr(9)) * 100) / 100;
       }
     })
   })
