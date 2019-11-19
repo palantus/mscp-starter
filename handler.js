@@ -88,6 +88,7 @@ class Handler{
       es.enabled = es.enabled === false ? false : true
       es.restartCount = s.restartCount
       es.memUsage = s.memUsage || null
+      es.mscpVersion = s.mscpVersion || "N/A"
       res.push(es)
     }
 
@@ -132,6 +133,13 @@ class Handler{
     let service = this.setup(name)
     if(!service) throw "Unknown service"
     const { stdout, stderr } = await exec('npm install', {cwd: service.path});
+    return stderr&&stdout?`errors: ${stderr}, info: ${stdout}`:stderr?stderr:stdout;
+  }
+
+  async npmupdate(name){
+    let service = this.setup(name)
+    if(!service) throw "Unknown service"
+    const { stdout, stderr } = await exec('npm update', {cwd: service.path});
     return stderr&&stdout?`errors: ${stderr}, info: ${stdout}`:stderr?stderr:stdout;
   }
 

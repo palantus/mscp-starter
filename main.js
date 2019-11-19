@@ -37,6 +37,8 @@ async function serviceReady(serv){
         resolve()
       } else if(typeof m === "string" && m.startsWith("mscp-mem:")){
         serv.memUsage = Math.round(parseFloat(m.substr(9)) * 100) / 100;
+      } else if(typeof m === "string" && m.startsWith("mscp-version:")){
+        serv.mscpVersion = m.substr(13);
       }
     })
   })

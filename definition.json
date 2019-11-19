@@ -75,6 +75,15 @@
       "args": []
     },
     {
+      "name": "npmupdate",
+      "title": "NPM update",
+      "description": "",
+      "returntype": "string",
+      "namespace": "",
+      "default": "",
+      "args": []
+    },
+    {
       "name": "addService",
       "title": "Add Service",
       "description": "",

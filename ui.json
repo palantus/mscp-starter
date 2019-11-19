@@ -10,8 +10,9 @@
         "<row>": [
           {"call": "log", "title": "View log", "args": {"name": "active.name"}},
           {"call": "setup", "title": "Show setup", "args": {"name": "active.name"}},
-          {"call": "gitpull", "title": "Execute: git pull", "args": {"name": "active.name"}, "ui": "notify-result", "notifytimeout": 7000},
-          {"call": "npminstall", "title": "Execute: npm install", "args": {"name": "active.name"}, "ui": "notify-result", "notifytimeout": 7000},
+          {"call": "gitpull", "title": "Execute: git pull", "args": {"name": "active.name"}, "ui": "notify-result", "notifytimeout": 10000},
+          {"call": "npminstall", "title": "Execute: npm install", "args": {"name": "active.name"}, "ui": "notify-result", "notifytimeout": 15000},
+          {"call": "npmupdate", "title": "Execute: npm update", "args": {"name": "active.name"}, "ui": "notify-result", "notifytimeout": 15000},
           {"call": "kill", "title": "Force stop", "args": {"name": "active.name"}, "ui": "notify-result", "rerunParentAfter": true},
           {"call": "enableService", "title": "Start and Enable", "args": {"name": "active.name"}, "ui": "notify-result", "rerunParentAfter": true},
           {"call": "disableService", "title": "Stop and Disable", "args": {"name": "active.name"}, "ui": "notify-result", "rerunParentAfter": true},
