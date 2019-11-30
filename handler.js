@@ -83,8 +83,8 @@ class Handler{
     for(let s of this.global.services){
       let es = JSON.parse(JSON.stringify(s.setup))
       let setup = await this.getServiceSetup(es)
-      es.http_port = (setup && setup.enableHTTP !== false) ? setup.http_port || 8080 : null
-      es.https_port = (setup && setup.enableHTTPS === true) ? setup.https_port || 443 : null
+      es.http_port = (setup && setup.enableHTTP !== false) ? setup.http_port || 8080 : es.http_port ? es.http_port : null
+      es.https_port = (setup && setup.enableHTTPS === true) ? setup.https_port || 443 : es.https_port ? es.https_port : null
       es.enabled = es.enabled === false ? false : true
       es.restartCount = s.restartCount
       es.memUsage = s.memUsage || null
