@@ -56,7 +56,7 @@ class Handler{
 
     for(let s of services){
       if(s.domain !== undefined){
-        let servicePort = (await this.getServiceSetup(s)).http_port
+        let servicePort = s.http_port || (await this.getServiceSetup(s)).http_port
         if(servicePort){
           this.global.proxySettings.router[`${s.domain}:${this.mscp.setupHandler.setup.proxyPort}`] = `http://localhost:${servicePort}`;
         }
