@@ -73,6 +73,7 @@ It is also possible to add additional proxy addresses outside of the services:
 
 ```
 proxyRoutes: {
+  ".*/ws/remote" : "http://192.168.0.123:9000",
   "test.mydomain.com" : "http://192.168.0.123:9000"
 }
 ```

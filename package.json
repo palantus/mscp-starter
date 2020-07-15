@@ -10,9 +10,10 @@
 		"start": "node main.js"
 	},
 	"dependencies": {
-		"mscp": "*",
-		"moment": "*",
 		"express": "*",
-		"http-proxy-middleware": "*"
+		"http-proxy": "^1.18.1",
+		"http-proxy-rules": "^1.1.3",
+		"moment": "*",
+		"mscp": "*"
 	}
 }

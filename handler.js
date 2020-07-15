@@ -5,7 +5,10 @@ const path = require("path")
 const util = require('util');
 const exec = util.promisify(require('child_process').exec);
 const express = require('express');
-const proxy = require('http-proxy-middleware');
+
+const http = require("http")
+const httpProxy = require('http-proxy');
+const HttpProxyRules = require('http-proxy-rules');
 
 class Handler{
 
@@ -21,20 +24,23 @@ class Handler{
 
   async startProxy(){
 
+    console.log("Starting proxy...")
+
     if(!this.mscp.setupHandler.setup.proxyPort){
       console.log("proxyPort not defined. Proxy not starting.")
       return;
     }
+    
+    // Basic settings
 
     this.global.proxySettings = {
-            target: this.mscp.setupHandler.setup.proxyTargetDefault || 'http://NOTEXISTINGDOMAIN', // target host
-            //changeOrigin: true,               // needed for virtual hosted sites
-            ws: true,                         // proxy websockets
-            pathRewrite: this.mscp.setupHandler.setup.proxyRewrite ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRewrite)) : null,
-            router: JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRoutes || {})),
-            ssl: this.mscp.setupHandler.setup.proxySSL ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxySSL)) : null,
-            xfwd: true
-        };
+        target: this.mscp.setupHandler.setup.proxyTargetDefault || 'http://NOTEXISTINGDOMAIN', // target host
+        //changeOrigin: true,               // needed for virtual hosted sites
+        ws: true,                         // proxy websockets
+        pathRewrite: this.mscp.setupHandler.setup.proxyRewrite ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxyRewrite)) : null,
+        ssl: this.mscp.setupHandler.setup.proxySSL ? JSON.parse(JSON.stringify(this.mscp.setupHandler.setup.proxySSL)) : null,
+        xfwd: true
+    };
 
     if(this.global.proxySettings.ssl){
       if(this.global.proxySettings.ssl.ca)
@@ -45,37 +51,69 @@ class Handler{
         this.global.proxySettings.ssl.key = fs.readFileSync(this.global.proxySettings.ssl.key, "utf8");
     }
 
-    for(let r in (this.global.proxySettings.router || {})){
-      this.global.proxySettings.router[`${r}:${this.mscp.setupHandler.setup.proxyPort}`] = this.global.proxySettings.router[r]
-      delete this.global.proxySettings.router[r]
-    }
+
+    //Find all routes/rules
+
+    let rules = this.mscp.setupHandler.setup.proxyRoutes || {}
 
     let services = []
     if(this.mscp.setupHandler.setup.starter && this.mscp.setupHandler.setup.starter.services)
       services = this.mscp.setupHandler.setup.starter.services;
 
-    for(let s of services){
-      if(s.domain !== undefined){
-        let servicePort = s.http_port || (await this.getServiceSetup(s)).http_port
-        if(servicePort){
-          this.global.proxySettings.router[`${s.domain}:${this.mscp.setupHandler.setup.proxyPort}`] = `http://localhost:${servicePort}`;
-        }
+    for(let s of services.filter(s => s.domain !== undefined)){
+      let servicePort = s.http_port || (await this.getServiceSetup(s)).http_port
+      if(servicePort){
+        rules[s.domain] = `http://localhost:${servicePort}`;
       }
     }
 
-    this.global.proxy = proxy(this.global.proxySettings)
+    // Start the proxy
 
-    let app = express();
-    app.use('/', this.global.proxy);
+    var proxyRules = new HttpProxyRules({
+      rules,
+      default: this.mscp.setupHandler.setup.proxyTargetDefault // default target
+    });
 
-    if(this.global.proxySettings.ssl){
-      let server = require("https").createServer(this.global.proxySettings.ssl, app);
-      server.listen(this.mscp.setupHandler.setup.proxyPort);
-      server.on('upgrade', this.global.proxy.upgrade);
-    } else {
-      let server = require("https").createServer(this.global.proxySettings.ssl, app);
-      app.listen(this.mscp.setupHandler.setup.proxyPort).on('upgrade', this.global.proxy.upgrade);
+    var proxy = httpProxy.createProxy();
+    proxy.on("error", (err) => {
+      console.log(err)
+    })
+
+    let findTargetFromReq = (req) => {
+      var target = rules[req.headers.host]
+      if(!target)
+        target = proxyRules.match(req);
+      return target;
     }
+
+    let proxyFunction = (req, res) => {
+      var target = findTargetFromReq(req)
+
+      if (target) {     
+        return proxy.web(req, res, {
+          target: target,
+          ws: true,
+          xfwd: true
+        });      
+      }
+  
+      res.writeHead(500, { 'Content-Type': 'text/plain' });
+      res.end('The request url and path did not match any of the listed rules!');
+    }
+    
+    let proxyServer;
+    if(this.global.proxySettings.ssl){
+      proxyServer = require("https").createServer(this.global.proxySettings.ssl, proxyFunction).listen(this.mscp.setupHandler.setup.proxyPort);
+    } else {
+      proxyServer = require("http").createServer(proxyFunction).listen(this.mscp.setupHandler.setup.proxyPort);
+    }
+
+    proxyServer.on('upgrade', function (req, socket, head) {
+        var target = findTargetFromReq(req)
+        if (target) {
+            return proxy.ws(req, socket, head, { target: target });      
+        }
+    });
   }
 
   async services(){
