@@ -51,7 +51,7 @@ async function runService(serviceSetup){
   let service = {setup: serviceSetup, log: [], restartCount: 0}
   let logText = moment().format("YYYY-MM-DD_HH:mm:ss") + ": ";
   if(mainFileExists && serviceSetup.enabled !== false){
-    let worker = child.fork(mainFile, {cwd: cwd, silent: true})
+    let worker = child.fork(mainFile, serviceSetup.args || [], {cwd: cwd, silent: true})
     service.worker = worker
     worker.on('close', (code) => onServiceDeath(worker, serviceSetup, code));
     worker.stdout.on('data', (data) => service.log.push(`${moment().format("YYYY-MM-DD_HH:mm:ss")}: ${data}`))

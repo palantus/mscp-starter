@@ -30,7 +30,8 @@ Add mscp services to setup.json like this:
       {
         "name": "passec",
         "path": "../mscp-passec",
-        "main": "main.js"
+        "main": "main.js",
+        "args": ["-db", "../my.db"]
       }
     ]
   }
